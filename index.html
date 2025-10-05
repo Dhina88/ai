@@ -9,6 +9,12 @@
 </head>
 <body>
     <div id="app">
+        <!-- Voice Call Status -->
+        <div class="voice-call-status" id="voiceCallStatus">
+            <i class="fas fa-phone"></i>
+            <span>Voice Call Active - AI is listening</span>
+        </div>
+        
         <!-- Login Page -->
         <div id="loginPage" class="page active">
             <div class="login-container">
@@ -93,17 +99,17 @@
                             <span>AI is speaking...</span>
                         </div>
                         <div class="input-group">
-                            <input type="text" id="messageInput" placeholder="Type your response or use voice..." disabled>
-                            <button id="voiceBtn" class="btn btn-secondary" disabled>
-                                <i class="fas fa-microphone"></i>
+                            <input type="text" id="messageInput" placeholder="Type your response or speak naturally..." disabled>
+                            <button id="voiceBtn" class="btn btn-secondary" disabled title="Start Voice Call">
+                                <i class="fas fa-phone"></i>
                             </button>
                             <button id="sendBtn" class="btn btn-primary" disabled>
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
                         <div class="voice-hint">
-                            <i class="fas fa-microphone"></i>
-                            <span>Click the microphone to speak your answer</span>
+                            <i class="fas fa-phone"></i>
+                            <span>Click the phone button to start voice call mode for continuous conversation</span>
                         </div>
                     </div>
                 </div>

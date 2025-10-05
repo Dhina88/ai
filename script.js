@@ -21,6 +21,9 @@ class AIHiringSystem {
         this.recognition = null;
         this.synthesis = window.speechSynthesis;
         this.voices = [];
+        this.isContinuousMode = false;
+        this.silenceTimeout = null;
+        this.isProcessing = false;
         
         this.initializeEventListeners();
         this.initializeVoiceFeatures();
@@ -61,9 +64,9 @@ class AIHiringSystem {
             }
         });
 
-        // Voice input button
+        // Voice input button (now for toggling continuous mode)
         document.getElementById('voiceBtn').addEventListener('click', () => {
-            this.toggleVoiceInput();
+            this.toggleContinuousMode();
         });
     }
 
@@ -72,25 +75,61 @@ class AIHiringSystem {
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             this.recognition = new SpeechRecognition();
-            this.recognition.continuous = false;
-            this.recognition.interimResults = false;
+            this.recognition.continuous = true; // Enable continuous listening
+            this.recognition.interimResults = true; // Get interim results
             this.recognition.lang = 'en-US';
 
             this.recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                document.getElementById('messageInput').value = transcript;
-                this.sendMessage();
+                let finalTranscript = '';
+                let interimTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+
+                // Update input field with interim results
+                if (interimTranscript) {
+                    document.getElementById('messageInput').value = interimTranscript;
+                }
+
+                // Process final transcript
+                if (finalTranscript && !this.isProcessing) {
+                    this.processVoiceInput(finalTranscript);
+                }
             };
 
             this.recognition.onerror = (event) => {
                 console.error('Speech recognition error:', event.error);
-                this.showNotification('Voice recognition error. Please try again.', 'error');
-                this.isListening = false;
-                this.updateVoiceButton();
+                if (event.error === 'no-speech' || event.error === 'audio-capture') {
+                    // Restart recognition for continuous mode
+                    if (this.isContinuousMode && this.interviewStarted) {
+                        setTimeout(() => {
+                            this.startContinuousListening();
+                        }, 1000);
+                    }
+                } else {
+                    this.showNotification('Voice recognition error. Please try again.', 'error');
+                    this.isContinuousMode = false;
+                    this.updateVoiceButton();
+                }
             };
 
             this.recognition.onend = () => {
-                this.isListening = false;
+                // Restart recognition for continuous mode
+                if (this.isContinuousMode && this.interviewStarted) {
+                    setTimeout(() => {
+                        this.startContinuousListening();
+                    }, 100);
+                }
+            };
+
+            this.recognition.onstart = () => {
+                this.isListening = true;
                 this.updateVoiceButton();
             };
         }
@@ -139,32 +178,83 @@ class AIHiringSystem {
         this.synthesis.speak(utterance);
     }
 
-    toggleVoiceInput() {
+    toggleContinuousMode() {
         if (!this.recognition) {
             this.showNotification('Voice recognition not supported in this browser', 'error');
             return;
         }
 
-        if (this.isListening) {
-            this.recognition.stop();
-            this.isListening = false;
+        if (this.isContinuousMode) {
+            this.stopContinuousListening();
         } else {
-            this.recognition.start();
-            this.isListening = true;
+            this.startContinuousListening();
         }
+    }
+
+    startContinuousListening() {
+        if (!this.interviewStarted) {
+            this.showNotification('Please start an interview first', 'error');
+            return;
+        }
+
+        this.isContinuousMode = true;
+        this.isProcessing = false;
+        
+        try {
+            this.recognition.start();
+            this.showNotification('Voice call mode activated - AI is now listening continuously', 'success');
+            document.getElementById('voiceCallStatus').classList.add('show');
+        } catch (error) {
+            console.error('Error starting continuous listening:', error);
+            this.showNotification('Failed to start voice recognition', 'error');
+        }
+    }
+
+    stopContinuousListening() {
+        this.isContinuousMode = false;
+        this.isListening = false;
+        this.recognition.stop();
         this.updateVoiceButton();
+        this.showNotification('Voice call mode deactivated', 'info');
+        document.getElementById('voiceCallStatus').classList.remove('show');
+    }
+
+    processVoiceInput(transcript) {
+        if (this.isProcessing) return;
+        
+        this.isProcessing = true;
+        const cleanTranscript = transcript.trim();
+        
+        if (cleanTranscript.length > 0) {
+            // Add user message
+            this.addMessage('user', 'You', cleanTranscript);
+            
+            // Clear input
+            document.getElementById('messageInput').value = '';
+            
+            // Move to next question after a short delay
+            setTimeout(() => {
+                this.currentQuestionIndex++;
+                this.askQuestion();
+                this.isProcessing = false;
+            }, 2000);
+        } else {
+            this.isProcessing = false;
+        }
     }
 
     updateVoiceButton() {
         const voiceBtn = document.getElementById('voiceBtn');
         const icon = voiceBtn.querySelector('i');
         
-        if (this.isListening) {
+        if (this.isContinuousMode) {
             voiceBtn.classList.add('listening');
-            icon.className = 'fas fa-stop';
+            icon.className = 'fas fa-phone-slash';
+            voiceBtn.title = 'End Voice Call';
         } else {
             voiceBtn.classList.remove('listening');
-            icon.className = 'fas fa-microphone';
+            icon.className = 'fas fa-phone';
+            voiceBtn.title = 'Start Voice Call';
         }
     }
 
@@ -258,11 +348,20 @@ class AIHiringSystem {
 
         // Start with the first question
         this.askQuestion();
+        
+        // Show voice call option
+        this.showNotification('Click the phone button to start voice call mode for continuous conversation', 'info');
     }
 
     endInterview() {
         this.interviewStarted = false;
         this.currentQuestionIndex = 0;
+        
+        // Stop continuous listening if active
+        if (this.isContinuousMode) {
+            this.stopContinuousListening();
+        }
+        
         this.showPage('dashboardPage');
         
         // Clear chat messages

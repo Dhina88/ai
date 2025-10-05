@@ -145,13 +145,13 @@ body {
 }
 
 .btn.listening {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
     color: white;
     animation: pulse 1.5s infinite;
 }
 
 .btn.listening:hover {
-    background: linear-gradient(135deg, #ff5252 0%, #d63031 100%);
+    background: linear-gradient(135deg, #00a085 0%, #00b894 100%);
 }
 
 .btn-large {
@@ -395,7 +395,45 @@ body {
 }
 
 .voice-hint i {
-    color: #667eea;
+    color: #00b894;
+}
+
+/* Voice Call Status Indicator */
+.voice-call-status {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 5px 15px rgba(0, 184, 148, 0.3);
+    animation: slideInLeft 0.3s ease;
+}
+
+.voice-call-status.show {
+    display: flex;
+}
+
+.voice-call-status i {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 
 /* Notification Styles */
