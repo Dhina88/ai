@@ -3,162 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Hiring System</title>
+    <title>D-ID Chat</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div id="app">
-        <!-- Voice Call Status -->
-        <div class="voice-call-status" id="voiceCallStatus">
-            <i class="fas fa-phone"></i>
-            <span>Voice Call Active - AI is listening</span>
-        </div>
-        
-        <!-- Login Page -->
-        <div id="loginPage" class="page active">
-            <div class="login-container">
-                <div class="login-card">
-                    <div class="logo">
-                        <i class="fas fa-robot"></i>
-                        <h1>AI Hiring System</h1>
-                    </div>
-                    <form id="loginForm">
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" required>
+        <!-- Main Chat Interface -->
+        <div id="chatPage" class="page active">
+            <div class="main-container">
+                <!-- Left Sidebar -->
+                <div class="sidebar">
+                    <div class="user-profile">
+                        <div class="profile-icon">
+                            <i class="fas fa-user"></i>
                         </div>
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" id="password" required>
+                        <span class="welcome-text">Welcome, guest</span>
+                    </div>
+                    
+                    <nav class="sidebar-nav">
+                        <div class="nav-item">
+                            <i class="fas fa-share-alt"></i>
+                            <span>Share Chat D-ID</span>
                         </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-sign-in-alt"></i>
-                            Login
-                        </button>
-                    </form>
+                        <div class="nav-item">
+                            <i class="fas fa-code"></i>
+                            <span>D-ID for developers</span>
+                        </div>
+                        <div class="nav-item">
+                            <i class="fas fa-arrow-right"></i>
+                            <span>Sign in / Sign up</span>
+                        </div>
+                    </nav>
                 </div>
-            </div>
-        </div>
 
-        <!-- Dashboard Page -->
-        <div id="dashboardPage" class="page">
-            <header class="header">
-                <div class="header-content">
-                    <h1>Welcome to AI Hiring System</h1>
-                    <div class="user-info">
-                        <span id="userEmail"></span>
-                        <button id="logoutBtn" class="btn btn-secondary">
-                            <i class="fas fa-sign-out-alt"></i>
-                            Logout
-                        </button>
-                    </div>
-                </div>
-            </header>
-            
-            <main class="dashboard">
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h2>Ready for Your Interview?</h2>
-                        <p>Click the button below to start your AI-powered interview session</p>
-                    </div>
-                    <div class="card-content">
-                        <button id="startInterviewBtn" class="btn btn-primary btn-large">
-                            <i class="fas fa-microphone"></i>
-                            Start AI Interview
-                        </button>
-                    </div>
-                </div>
-            </main>
-        </div>
+                <!-- Main Content Area -->
+                <div class="main-content">
+                    <!-- Header with D-ID Logo -->
+                    <header class="main-header">
+                        <div class="logo">
+                            <span class="logo-text">D-</span>
+                            <div class="logo-icon">
+                                <div class="head-profile">
+                                    <div class="brain-pattern"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
 
-        <!-- Interview Page -->
-        <div id="interviewPage" class="page">
-            <header class="interview-header">
-                <div class="header-content">
-                    <h1>AI Interview Session</h1>
-                    <div class="interview-controls">
-                        <button id="endInterviewBtn" class="btn btn-secondary">
-                            <i class="fas fa-stop"></i>
-                            End Interview
-                        </button>
-                    </div>
-                </div>
-            </header>
-            
-            <main class="interview-container">
-                <div class="interview-interface">
-                    <!-- AI Character Section -->
+                    <!-- Character Section -->
                     <div class="character-section">
                         <div class="character-container">
-                            <div class="ai-character" id="aiCharacter">
-                                <!-- Character Head -->
-                                <div class="character-head">
-                                    <div class="character-face">
-                                        <div class="character-eyes">
-                                            <div class="eye left-eye">
-                                                <div class="pupil"></div>
-                                            </div>
-                                            <div class="eye right-eye">
-                                                <div class="pupil"></div>
-                                            </div>
-                                        </div>
-                                        <div class="character-mouth" id="characterMouth">
-                                            <div class="mouth-shape"></div>
-                                        </div>
-                                    </div>
+                            <div class="character-image">
+                                <div class="character-glow"></div>
+                                <div class="character-avatar">
+                                    <div class="avatar-hair"></div>
+                                    <div class="avatar-face"></div>
                                 </div>
-                                <!-- Character Body -->
-                                <div class="character-body">
-                                    <div class="character-arms">
-                                        <div class="arm left-arm" id="leftArm"></div>
-                                        <div class="arm right-arm" id="rightArm"></div>
-                                    </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Section -->
+                    <div class="chat-section">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message ai-message">
+                                <div class="message-content">
+                                    Hi, I'm Alice 👋. I'm the face of chat AI, what would you like to talk about today?
                                 </div>
-                                <!-- Character Name -->
-                                <div class="character-name">AI Interviewer</div>
+                            </div>
+                            <div class="message ai-message">
+                                <div class="message-content">
+                                    Ask away by typing or recording your message
+                                </div>
                             </div>
                         </div>
                         
-                        <!-- Subtitle Display -->
-                        <div class="subtitle-container">
-                            <div class="subtitle" id="subtitle">
-                                <span id="subtitleText">Welcome! I'm your AI interviewer. Let's begin!</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Chat Section -->
-                    <div class="chat-section">
-                        <div class="chat-container">
-                            <div id="chatMessages" class="chat-messages">
-                                <!-- Messages will be dynamically added here -->
-                            </div>
-                            <div class="chat-input-container">
-                                <div class="typing-indicator" id="typingIndicator">
-                                    <span>AI is typing...</span>
-                                </div>
-                                <div class="speaking-indicator" id="speakingIndicator">
-                                    <span>AI is speaking...</span>
-                                </div>
-                                <div class="input-group">
-                                    <input type="text" id="messageInput" placeholder="Type your response or speak naturally..." disabled>
-                                    <button id="voiceBtn" class="btn btn-secondary" disabled title="Start Voice Call">
-                                        <i class="fas fa-phone"></i>
+                        <div class="chat-input-container">
+                            <div class="input-wrapper">
+                                <input type="text" id="messageInput" placeholder="Type your message..." maxlength="350">
+                                <div class="input-controls">
+                                    <span class="char-counter">0/350</span>
+                                    <button class="input-btn microphone-btn" id="voiceBtn">
+                                        <i class="fas fa-microphone"></i>
                                     </button>
-                                    <button id="sendBtn" class="btn btn-primary" disabled>
+                                    <button class="input-btn send-btn" id="sendBtn">
                                         <i class="fas fa-paper-plane"></i>
                                     </button>
-                                </div>
-                                <div class="voice-hint">
-                                    <i class="fas fa-phone"></i>
-                                    <span>Click the phone button to start voice call mode for continuous conversation</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
     </div>
 

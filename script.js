@@ -1,58 +1,19 @@
-// AI Hiring System JavaScript
+// D-ID Chat JavaScript
 
-class AIHiringSystem {
+class DIDChat {
     constructor() {
-        this.currentUser = null;
-        this.interviewQuestions = [
-            "Hello! Welcome to your AI interview. Let's start with a brief introduction. Can you tell me about yourself and your professional background?",
-            "What interests you most about this position, and what motivated you to apply?",
-            "Can you describe a challenging project you've worked on recently? What was your role and how did you handle any obstacles?",
-            "How do you stay updated with the latest trends and technologies in your field?",
-            "Tell me about a time when you had to work with a difficult team member. How did you handle the situation?",
-            "What are your greatest strengths, and how do they contribute to your work?",
-            "Can you describe a situation where you had to learn something new quickly? How did you approach it?",
-            "Where do you see yourself in 5 years, and how does this role fit into your career goals?",
-            "What questions do you have about our company or this position?",
-            "Thank you for your time today. Is there anything else you'd like to add that we haven't covered?"
-        ];
-        this.currentQuestionIndex = 0;
-        this.interviewStarted = false;
         this.isListening = false;
         this.recognition = null;
         this.synthesis = window.speechSynthesis;
         this.voices = [];
-        this.isContinuousMode = false;
-        this.silenceTimeout = null;
         this.isProcessing = false;
-        this.characterState = 'idle'; // idle, speaking, listening
         
         this.initializeEventListeners();
         this.initializeVoiceFeatures();
-        this.showPage('loginPage');
+        this.updateCharCounter();
     }
 
     initializeEventListeners() {
-        // Login form
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handleLogin();
-        });
-
-        // Logout button
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            this.handleLogout();
-        });
-
-        // Start interview button
-        document.getElementById('startInterviewBtn').addEventListener('click', () => {
-            this.startInterview();
-        });
-
-        // End interview button
-        document.getElementById('endInterviewBtn').addEventListener('click', () => {
-            this.endInterview();
-        });
-
         // Send message button
         document.getElementById('sendBtn').addEventListener('click', () => {
             this.sendMessage();
@@ -65,9 +26,14 @@ class AIHiringSystem {
             }
         });
 
-        // Voice input button (now for toggling continuous mode)
+        // Character counter update
+        document.getElementById('messageInput').addEventListener('input', () => {
+            this.updateCharCounter();
+        });
+
+        // Voice input button
         document.getElementById('voiceBtn').addEventListener('click', () => {
-            this.toggleContinuousMode();
+            this.toggleVoiceInput();
         });
     }
 
@@ -76,57 +42,25 @@ class AIHiringSystem {
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             this.recognition = new SpeechRecognition();
-            this.recognition.continuous = true; // Enable continuous listening
-            this.recognition.interimResults = true; // Get interim results
+            this.recognition.continuous = false;
+            this.recognition.interimResults = false;
             this.recognition.lang = 'en-US';
 
             this.recognition.onresult = (event) => {
-                let finalTranscript = '';
-                let interimTranscript = '';
-
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const transcript = event.results[i][0].transcript;
-                    if (event.results[i].isFinal) {
-                        finalTranscript += transcript;
-                    } else {
-                        interimTranscript += transcript;
-                    }
-                }
-
-                // Update input field with interim results
-                if (interimTranscript) {
-                    document.getElementById('messageInput').value = interimTranscript;
-                }
-
-                // Process final transcript
-                if (finalTranscript && !this.isProcessing) {
-                    this.processVoiceInput(finalTranscript);
-                }
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('messageInput').value = transcript;
+                this.updateCharCounter();
             };
 
             this.recognition.onerror = (event) => {
                 console.error('Speech recognition error:', event.error);
-                if (event.error === 'no-speech' || event.error === 'audio-capture') {
-                    // Restart recognition for continuous mode
-                    if (this.isContinuousMode && this.interviewStarted) {
-                        setTimeout(() => {
-                            this.startContinuousListening();
-                        }, 1000);
-                    }
-                } else {
-                    this.showNotification('Voice recognition error. Please try again.', 'error');
-                    this.isContinuousMode = false;
-                    this.updateVoiceButton();
-                }
+                this.isListening = false;
+                this.updateVoiceButton();
             };
 
             this.recognition.onend = () => {
-                // Restart recognition for continuous mode
-                if (this.isContinuousMode && this.interviewStarted) {
-                    setTimeout(() => {
-                        this.startContinuousListening();
-                    }, 100);
-                }
+                this.isListening = false;
+                this.updateVoiceButton();
             };
 
             this.recognition.onstart = () => {
@@ -168,91 +102,19 @@ class AIHiringSystem {
         utterance.pitch = 1;
         utterance.volume = 0.8;
 
-        utterance.onstart = () => {
-            document.getElementById('speakingIndicator').classList.add('show');
-            this.setCharacterState('speaking');
-            this.updateSubtitle(text);
-        };
-
-        utterance.onend = () => {
-            document.getElementById('speakingIndicator').classList.remove('show');
-            this.setCharacterState('idle');
-            this.clearSubtitle();
-        };
-
         this.synthesis.speak(utterance);
     }
 
-    toggleContinuousMode() {
+    toggleVoiceInput() {
         if (!this.recognition) {
-            this.showNotification('Voice recognition not supported in this browser', 'error');
+            alert('Voice recognition not supported in this browser');
             return;
         }
 
-        if (this.isContinuousMode) {
-            this.stopContinuousListening();
+        if (this.isListening) {
+            this.recognition.stop();
         } else {
-            this.startContinuousListening();
-        }
-    }
-
-    startContinuousListening() {
-        if (!this.interviewStarted) {
-            this.showNotification('Please start an interview first', 'error');
-            return;
-        }
-
-        this.isContinuousMode = true;
-        this.isProcessing = false;
-        
-        try {
             this.recognition.start();
-            this.showNotification('Voice call mode activated - AI is now listening continuously', 'success');
-            document.getElementById('voiceCallStatus').classList.add('show');
-            this.setCharacterState('listening');
-            this.updateSubtitle('I\'m listening... Please speak naturally.');
-        } catch (error) {
-            console.error('Error starting continuous listening:', error);
-            this.showNotification('Failed to start voice recognition', 'error');
-        }
-    }
-
-    stopContinuousListening() {
-        this.isContinuousMode = false;
-        this.isListening = false;
-        this.recognition.stop();
-        this.updateVoiceButton();
-        this.showNotification('Voice call mode deactivated', 'info');
-        document.getElementById('voiceCallStatus').classList.remove('show');
-        this.setCharacterState('idle');
-        this.clearSubtitle();
-    }
-
-    processVoiceInput(transcript) {
-        if (this.isProcessing) return;
-        
-        this.isProcessing = true;
-        const cleanTranscript = transcript.trim();
-        
-        if (cleanTranscript.length > 0) {
-            // Add user message
-            this.addMessage('user', 'You', cleanTranscript);
-            
-            // Clear input
-            document.getElementById('messageInput').value = '';
-            
-            // Show character is processing
-            this.setCharacterState('listening');
-            this.updateSubtitle('Thank you for your response. Let me ask the next question...');
-            
-            // Move to next question after a short delay
-            setTimeout(() => {
-                this.currentQuestionIndex++;
-                this.askQuestion();
-                this.isProcessing = false;
-            }, 2000);
-        } else {
-            this.isProcessing = false;
         }
     }
 
@@ -260,180 +122,25 @@ class AIHiringSystem {
         const voiceBtn = document.getElementById('voiceBtn');
         const icon = voiceBtn.querySelector('i');
         
-        if (this.isContinuousMode) {
-            voiceBtn.classList.add('listening');
-            icon.className = 'fas fa-phone-slash';
-            voiceBtn.title = 'End Voice Call';
+        if (this.isListening) {
+            voiceBtn.style.color = '#3b82f6';
+            icon.className = 'fas fa-stop';
         } else {
-            voiceBtn.classList.remove('listening');
-            icon.className = 'fas fa-phone';
-            voiceBtn.title = 'Start Voice Call';
+            voiceBtn.style.color = '#6b7280';
+            icon.className = 'fas fa-microphone';
         }
     }
 
-    showNotification(message, type = 'info') {
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.textContent = message;
+    updateCharCounter() {
+        const input = document.getElementById('messageInput');
+        const counter = document.querySelector('.char-counter');
+        const length = input.value.length;
+        counter.textContent = `${length}/350`;
         
-        // Add to page
-        document.body.appendChild(notification);
-        
-        // Show notification
-        setTimeout(() => notification.classList.add('show'), 100);
-        
-        // Remove after 3 seconds
-        setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
-
-    setCharacterState(state) {
-        const character = document.getElementById('aiCharacter');
-        
-        // Remove all state classes
-        character.classList.remove('character-idle', 'character-speaking', 'character-listening');
-        
-        // Add new state class
-        character.classList.add(`character-${state}`);
-        this.characterState = state;
-    }
-
-    updateSubtitle(text) {
-        const subtitleText = document.getElementById('subtitleText');
-        subtitleText.textContent = text;
-    }
-
-    clearSubtitle() {
-        const subtitleText = document.getElementById('subtitleText');
-        subtitleText.textContent = 'Ready to continue...';
-    }
-
-    showPage(pageId) {
-        // Hide all pages
-        document.querySelectorAll('.page').forEach(page => {
-            page.classList.remove('active');
-        });
-        
-        // Show the specified page
-        document.getElementById(pageId).classList.add('active');
-    }
-
-    handleLogin() {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-
-        // Admin credentials
-        const adminCredentials = {
-            email: 'admin@ai-hiring.com',
-            password: 'admin123'
-        };
-
-        // Simple validation (in a real app, this would be server-side)
-        if (email && password) {
-            const isAdmin = email === adminCredentials.email && password === adminCredentials.password;
-            this.currentUser = { 
-                email, 
-                isAdmin,
-                role: isAdmin ? 'Administrator' : 'Candidate'
-            };
-            document.getElementById('userEmail').textContent = `${email} (${this.currentUser.role})`;
-            this.showPage('dashboardPage');
-            
-            // Clear login form
-            document.getElementById('loginForm').reset();
+        if (length > 300) {
+            counter.style.color = '#ef4444';
         } else {
-            this.showNotification('Please enter both email and password', 'error');
-        }
-    }
-
-    handleLogout() {
-        this.currentUser = null;
-        this.interviewStarted = false;
-        this.currentQuestionIndex = 0;
-        this.showPage('loginPage');
-        
-        // Clear chat messages
-        document.getElementById('chatMessages').innerHTML = '';
-        
-        // Reset message input
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        messageInput.disabled = true;
-        messageInput.value = '';
-        sendBtn.disabled = true;
-    }
-
-    startInterview() {
-        this.interviewStarted = true;
-        this.currentQuestionIndex = 0;
-        this.showPage('interviewPage');
-        
-        // Enable message input and voice controls
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const voiceBtn = document.getElementById('voiceBtn');
-        messageInput.disabled = false;
-        sendBtn.disabled = false;
-        voiceBtn.disabled = false;
-        messageInput.focus();
-
-        // Initialize character
-        this.setCharacterState('idle');
-        this.updateSubtitle('Welcome! I\'m your AI interviewer. Let\'s begin!');
-
-        // Start with the first question
-        this.askQuestion();
-        
-        // Show voice call option
-        this.showNotification('Click the phone button to start voice call mode for continuous conversation', 'info');
-    }
-
-    endInterview() {
-        this.interviewStarted = false;
-        this.currentQuestionIndex = 0;
-        
-        // Stop continuous listening if active
-        if (this.isContinuousMode) {
-            this.stopContinuousListening();
-        }
-        
-        this.showPage('dashboardPage');
-        
-        // Clear chat messages
-        document.getElementById('chatMessages').innerHTML = '';
-        
-        // Disable message input and voice controls
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const voiceBtn = document.getElementById('voiceBtn');
-        messageInput.disabled = true;
-        messageInput.value = '';
-        sendBtn.disabled = true;
-        voiceBtn.disabled = true;
-    }
-
-    askQuestion() {
-        if (this.currentQuestionIndex < this.interviewQuestions.length) {
-            const question = this.interviewQuestions[this.currentQuestionIndex];
-            this.addMessage('ai', 'AI Interviewer', question);
-            
-            // Speak the question
-            this.speak(question);
-            
-            // Show typing indicator
-            this.showTypingIndicator();
-            
-            // Hide typing indicator after a delay
-            setTimeout(() => {
-                this.hideTypingIndicator();
-            }, 1000);
-        } else {
-            const finalMessage = 'Thank you for completing the interview! We will review your responses and get back to you soon. Have a great day!';
-            this.addMessage('ai', 'AI Interviewer', finalMessage);
-            this.speak(finalMessage);
+            counter.style.color = '#9ca3af';
         }
     }
 
@@ -443,43 +150,34 @@ class AIHiringSystem {
         
         if (message) {
             // Add user message
-            this.addMessage('user', 'You', message);
+            this.addMessage('user', message);
             
             // Clear input
             messageInput.value = '';
+            this.updateCharCounter();
             
-            // Move to next question after a short delay
+            // Simulate AI response
             setTimeout(() => {
-                this.currentQuestionIndex++;
-                this.askQuestion();
-            }, 1500);
+                this.addMessage('ai', 'Thanks for your message! I\'m Alice, your AI assistant. How can I help you today?');
+            }, 1000);
         }
     }
 
-    addMessage(type, sender, content) {
+    addMessage(type, content) {
         const chatMessages = document.getElementById('chatMessages');
         const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${type}`;
+        messageDiv.className = `message ${type}-message`;
         
         messageDiv.innerHTML = `
-            <div class="message-header">${sender}</div>
             <div class="message-content">${content}</div>
         `;
         
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
-
-    showTypingIndicator() {
-        document.getElementById('typingIndicator').classList.add('show');
-    }
-
-    hideTypingIndicator() {
-        document.getElementById('typingIndicator').classList.remove('show');
-    }
 }
 
 // Initialize the application when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new AIHiringSystem();
+    new DIDChat();
 });
