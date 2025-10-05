@@ -24,6 +24,7 @@ class AIHiringSystem {
         this.isContinuousMode = false;
         this.silenceTimeout = null;
         this.isProcessing = false;
+        this.characterState = 'idle'; // idle, speaking, listening
         
         this.initializeEventListeners();
         this.initializeVoiceFeatures();
@@ -169,10 +170,14 @@ class AIHiringSystem {
 
         utterance.onstart = () => {
             document.getElementById('speakingIndicator').classList.add('show');
+            this.setCharacterState('speaking');
+            this.updateSubtitle(text);
         };
 
         utterance.onend = () => {
             document.getElementById('speakingIndicator').classList.remove('show');
+            this.setCharacterState('idle');
+            this.clearSubtitle();
         };
 
         this.synthesis.speak(utterance);
@@ -204,6 +209,8 @@ class AIHiringSystem {
             this.recognition.start();
             this.showNotification('Voice call mode activated - AI is now listening continuously', 'success');
             document.getElementById('voiceCallStatus').classList.add('show');
+            this.setCharacterState('listening');
+            this.updateSubtitle('I\'m listening... Please speak naturally.');
         } catch (error) {
             console.error('Error starting continuous listening:', error);
             this.showNotification('Failed to start voice recognition', 'error');
@@ -217,6 +224,8 @@ class AIHiringSystem {
         this.updateVoiceButton();
         this.showNotification('Voice call mode deactivated', 'info');
         document.getElementById('voiceCallStatus').classList.remove('show');
+        this.setCharacterState('idle');
+        this.clearSubtitle();
     }
 
     processVoiceInput(transcript) {
@@ -231,6 +240,10 @@ class AIHiringSystem {
             
             // Clear input
             document.getElementById('messageInput').value = '';
+            
+            // Show character is processing
+            this.setCharacterState('listening');
+            this.updateSubtitle('Thank you for your response. Let me ask the next question...');
             
             // Move to next question after a short delay
             setTimeout(() => {
@@ -275,6 +288,27 @@ class AIHiringSystem {
             notification.classList.remove('show');
             setTimeout(() => notification.remove(), 300);
         }, 3000);
+    }
+
+    setCharacterState(state) {
+        const character = document.getElementById('aiCharacter');
+        
+        // Remove all state classes
+        character.classList.remove('character-idle', 'character-speaking', 'character-listening');
+        
+        // Add new state class
+        character.classList.add(`character-${state}`);
+        this.characterState = state;
+    }
+
+    updateSubtitle(text) {
+        const subtitleText = document.getElementById('subtitleText');
+        subtitleText.textContent = text;
+    }
+
+    clearSubtitle() {
+        const subtitleText = document.getElementById('subtitleText');
+        subtitleText.textContent = 'Ready to continue...';
     }
 
     showPage(pageId) {
@@ -345,6 +379,10 @@ class AIHiringSystem {
         sendBtn.disabled = false;
         voiceBtn.disabled = false;
         messageInput.focus();
+
+        // Initialize character
+        this.setCharacterState('idle');
+        this.updateSubtitle('Welcome! I\'m your AI interviewer. Let\'s begin!');
 
         // Start with the first question
         this.askQuestion();
