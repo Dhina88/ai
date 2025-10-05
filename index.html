@@ -89,11 +89,21 @@
                         <div class="typing-indicator" id="typingIndicator">
                             <span>AI is typing...</span>
                         </div>
+                        <div class="speaking-indicator" id="speakingIndicator">
+                            <span>AI is speaking...</span>
+                        </div>
                         <div class="input-group">
-                            <input type="text" id="messageInput" placeholder="Type your response..." disabled>
+                            <input type="text" id="messageInput" placeholder="Type your response or use voice..." disabled>
+                            <button id="voiceBtn" class="btn btn-secondary" disabled>
+                                <i class="fas fa-microphone"></i>
+                            </button>
                             <button id="sendBtn" class="btn btn-primary" disabled>
                                 <i class="fas fa-paper-plane"></i>
                             </button>
+                        </div>
+                        <div class="voice-hint">
+                            <i class="fas fa-microphone"></i>
+                            <span>Click the microphone to speak your answer</span>
                         </div>
                     </div>
                 </div>
