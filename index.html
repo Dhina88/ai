@@ -3,99 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D-ID Chat</title>
+    <title>Unethiat Frops</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div id="app">
-        <!-- Main Chat Interface -->
-        <div id="chatPage" class="page active">
-            <div class="main-container">
-                <!-- Left Sidebar -->
-                <div class="sidebar">
-                    <div class="user-profile">
-                        <div class="profile-icon">
-                            <i class="fas fa-user"></i>
+        <!-- Main Interface -->
+        <div id="mainPage" class="page active">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-content">
+                    <div class="logo-section">
+                        <div class="logo">
+                            <span class="logo-text">unethiat</span>
+                            <span class="logo-subtitle">Frops</span>
                         </div>
-                        <span class="welcome-text">Welcome, guest</span>
                     </div>
                     
-                    <nav class="sidebar-nav">
-                        <div class="nav-item">
-                            <i class="fas fa-share-alt"></i>
-                            <span>Share Chat D-ID</span>
+                    <div class="search-section">
+                        <div class="search-bar">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Quenafer">
                         </div>
-                        <div class="nav-item">
-                            <i class="fas fa-code"></i>
-                            <span>D-ID for developers</span>
-                        </div>
-                        <div class="nav-item">
-                            <i class="fas fa-arrow-right"></i>
-                            <span>Sign in / Sign up</span>
-                        </div>
+                    </div>
+                    
+                    <nav class="nav-menu">
+                        <a href="#" class="nav-link">Hot Fard</a>
+                        <a href="#" class="nav-link active">Canportiar</a>
+                        <a href="#" class="nav-link">Softwares</a>
+                        <a href="#" class="nav-link">Prodacts</a>
+                        <a href="#" class="nav-link">Home</a>
                     </nav>
+                    
+                    <div class="user-section">
+                        <div class="user-profile">
+                            <div class="profile-icon">
+                                <span>B</span>
+                                <div class="notification-badge">1</div>
+                            </div>
+                            <span class="username">AEART</span>
+                        </div>
+                    </div>
                 </div>
+            </header>
 
-                <!-- Main Content Area -->
-                <div class="main-content">
-                    <!-- Header with D-ID Logo -->
-                    <header class="main-header">
-                        <div class="logo">
-                            <span class="logo-text">D-</span>
-                            <div class="logo-icon">
-                                <div class="head-profile">
-                                    <div class="brain-pattern"></div>
+            <!-- Main Content -->
+            <main class="main-container">
+                <!-- Left Section - Character -->
+                <div class="left-section">
+                    <div class="character-container">
+                        <div class="character">
+                            <div class="character-head">
+                                <div class="character-hair"></div>
+                                <div class="character-face">
+                                    <div class="character-eyes">
+                                        <div class="eye left-eye">
+                                            <div class="pupil"></div>
+                                        </div>
+                                        <div class="eye right-eye">
+                                            <div class="pupil"></div>
+                                        </div>
+                                    </div>
+                                    <div class="character-nose"></div>
+                                    <div class="character-mouth"></div>
+                                    <div class="character-cheeks"></div>
                                 </div>
                             </div>
-                        </div>
-                    </header>
-
-                    <!-- Character Section -->
-                    <div class="character-section">
-                        <div class="character-container">
-                            <div class="character-image">
-                                <div class="character-glow"></div>
-                                <div class="character-avatar">
-                                    <div class="avatar-hair"></div>
-                                    <div class="avatar-face"></div>
+                            <div class="character-body">
+                                <div class="character-hoodie">
+                                    <div class="hoodie-emblem"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Chat Section -->
-                    <div class="chat-section">
-                        <div class="chat-messages" id="chatMessages">
-                            <div class="message ai-message">
-                                <div class="message-content">
-                                    Hi, I'm Alice 👋. I'm the face of chat AI, what would you like to talk about today?
-                                </div>
-                            </div>
-                            <div class="message ai-message">
-                                <div class="message-content">
-                                    Ask away by typing or recording your message
-                                </div>
-                            </div>
+                <!-- Right Section - Content -->
+                <div class="right-section">
+                    <div class="content-panel">
+                        <div class="text-block">
+                            <p>Dose moe a: software taligh</p>
+                            <p>help ttent you, watsh a</p>
+                            <p>segrol fat fect my torfee</p>
+                            <p>the wire is your lirfd.</p>
                         </div>
                         
-                        <div class="chat-input-container">
-                            <div class="input-wrapper">
-                                <input type="text" id="messageInput" placeholder="Type your message..." maxlength="350">
-                                <div class="input-controls">
-                                    <span class="char-counter">0/350</span>
-                                    <button class="input-btn microphone-btn" id="voiceBtn">
-                                        <i class="fas fa-microphone"></i>
-                                    </button>
-                                    <button class="input-btn send-btn" id="sendBtn">
-                                        <i class="fas fa-paper-plane"></i>
-                                    </button>
-                                </div>
-                            </div>
+                        <div class="text-block">
+                            <p>Derrer suno ag reaucg areo thet use shreadtuit x</p>
+                            <p>hous e conpect fo or clould that roclacJUH Filute!.</p>
                         </div>
+                        
+                        <button class="action-button">
+                            Aad tas Sihilaten Nomi
+                        </button>
                     </div>
                 </div>
-            </div>
+            </main>
         </div>
     </div>
 

@@ -1,183 +1,176 @@
-// D-ID Chat JavaScript
+// Unethiat Frops JavaScript
 
-class DIDChat {
+class UnethiatApp {
     constructor() {
-        this.isListening = false;
-        this.recognition = null;
-        this.synthesis = window.speechSynthesis;
-        this.voices = [];
-        this.isProcessing = false;
-        
         this.initializeEventListeners();
-        this.initializeVoiceFeatures();
-        this.updateCharCounter();
+        this.initializeAnimations();
     }
 
     initializeEventListeners() {
-        // Send message button
-        document.getElementById('sendBtn').addEventListener('click', () => {
-            this.sendMessage();
+        // Search functionality
+        const searchInput = document.querySelector('.search-bar input');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.handleSearch(e.target.value);
+                }
+            });
+        }
+
+        // Navigation links
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleNavigation(link);
+            });
         });
 
-        // Enter key in message input
-        document.getElementById('messageInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.sendMessage();
-            }
-        });
-
-        // Character counter update
-        document.getElementById('messageInput').addEventListener('input', () => {
-            this.updateCharCounter();
-        });
-
-        // Voice input button
-        document.getElementById('voiceBtn').addEventListener('click', () => {
-            this.toggleVoiceInput();
-        });
-    }
-
-    initializeVoiceFeatures() {
-        // Initialize speech recognition
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            this.recognition = new SpeechRecognition();
-            this.recognition.continuous = false;
-            this.recognition.interimResults = false;
-            this.recognition.lang = 'en-US';
-
-            this.recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                document.getElementById('messageInput').value = transcript;
-                this.updateCharCounter();
-            };
-
-            this.recognition.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
-                this.isListening = false;
-                this.updateVoiceButton();
-            };
-
-            this.recognition.onend = () => {
-                this.isListening = false;
-                this.updateVoiceButton();
-            };
-
-            this.recognition.onstart = () => {
-                this.isListening = true;
-                this.updateVoiceButton();
-            };
+        // Action button
+        const actionButton = document.querySelector('.action-button');
+        if (actionButton) {
+            actionButton.addEventListener('click', () => {
+                this.handleActionButton();
+            });
         }
 
-        // Load available voices
-        this.loadVoices();
-        if (this.synthesis.onvoiceschanged !== undefined) {
-            this.synthesis.onvoiceschanged = () => this.loadVoices();
+        // User profile
+        const userProfile = document.querySelector('.user-profile');
+        if (userProfile) {
+            userProfile.addEventListener('click', () => {
+                this.handleUserProfile();
+            });
         }
     }
 
-    loadVoices() {
-        this.voices = this.synthesis.getVoices();
-    }
-
-    speak(text) {
-        if (this.synthesis.speaking) {
-            this.synthesis.cancel();
-        }
-
-        const utterance = new SpeechSynthesisUtterance(text);
-        
-        // Try to find a good voice
-        const preferredVoice = this.voices.find(voice => 
-            voice.name.includes('Google') || 
-            voice.name.includes('Microsoft') ||
-            voice.lang.startsWith('en')
-        );
-        
-        if (preferredVoice) {
-            utterance.voice = preferredVoice;
-        }
-        
-        utterance.rate = 0.9;
-        utterance.pitch = 1;
-        utterance.volume = 0.8;
-
-        this.synthesis.speak(utterance);
-    }
-
-    toggleVoiceInput() {
-        if (!this.recognition) {
-            alert('Voice recognition not supported in this browser');
-            return;
-        }
-
-        if (this.isListening) {
-            this.recognition.stop();
-        } else {
-            this.recognition.start();
-        }
-    }
-
-    updateVoiceButton() {
-        const voiceBtn = document.getElementById('voiceBtn');
-        const icon = voiceBtn.querySelector('i');
-        
-        if (this.isListening) {
-            voiceBtn.style.color = '#3b82f6';
-            icon.className = 'fas fa-stop';
-        } else {
-            voiceBtn.style.color = '#6b7280';
-            icon.className = 'fas fa-microphone';
-        }
-    }
-
-    updateCharCounter() {
-        const input = document.getElementById('messageInput');
-        const counter = document.querySelector('.char-counter');
-        const length = input.value.length;
-        counter.textContent = `${length}/350`;
-        
-        if (length > 300) {
-            counter.style.color = '#ef4444';
-        } else {
-            counter.style.color = '#9ca3af';
-        }
-    }
-
-    sendMessage() {
-        const messageInput = document.getElementById('messageInput');
-        const message = messageInput.value.trim();
-        
-        if (message) {
-            // Add user message
-            this.addMessage('user', message);
+    initializeAnimations() {
+        // Add subtle animations to the character
+        const character = document.querySelector('.character');
+        if (character) {
+            // Blinking animation
+            this.startBlinkingAnimation();
             
-            // Clear input
-            messageInput.value = '';
-            this.updateCharCounter();
-            
-            // Simulate AI response
+            // Occasional head movement
+            this.startHeadMovement();
+        }
+    }
+
+    startBlinkingAnimation() {
+        const eyes = document.querySelectorAll('.eye');
+        
+        setInterval(() => {
+            eyes.forEach(eye => {
+                eye.style.transform = 'scaleY(0.1)';
+                setTimeout(() => {
+                    eye.style.transform = 'scaleY(1)';
+                }, 150);
+            });
+        }, 3000 + Math.random() * 2000);
+    }
+
+    startHeadMovement() {
+        const characterHead = document.querySelector('.character-head');
+        
+        setInterval(() => {
+            const randomDelay = Math.random() * 5000 + 2000;
             setTimeout(() => {
-                this.addMessage('ai', 'Thanks for your message! I\'m Alice, your AI assistant. How can I help you today?');
-            }, 1000);
+                characterHead.style.transform = 'translateX(5px)';
+                setTimeout(() => {
+                    characterHead.style.transform = 'translateX(-5px)';
+                    setTimeout(() => {
+                        characterHead.style.transform = 'translateX(0)';
+                    }, 200);
+                }, 200);
+            }, randomDelay);
+        }, 8000);
+    }
+
+    handleSearch(query) {
+        if (query.trim()) {
+            console.log('Searching for:', query);
+            // Add search functionality here
+            this.showNotification(`Searching for "${query}"...`);
         }
     }
 
-    addMessage(type, content) {
-        const chatMessages = document.getElementById('chatMessages');
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${type}-message`;
+    handleNavigation(link) {
+        // Remove active class from all links
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
         
-        messageDiv.innerHTML = `
-            <div class="message-content">${content}</div>
+        // Add active class to clicked link
+        link.classList.add('active');
+        
+        // Handle navigation logic
+        const linkText = link.textContent.trim();
+        console.log('Navigating to:', linkText);
+        
+        this.showNotification(`Navigating to ${linkText}...`);
+    }
+
+    handleActionButton() {
+        const button = document.querySelector('.action-button');
+        const originalText = button.textContent;
+        
+        // Button press animation
+        button.style.transform = 'scale(0.95)';
+        button.textContent = 'Processing...';
+        
+            setTimeout(() => {
+            button.style.transform = 'scale(1)';
+            button.textContent = originalText;
+            this.showNotification('Action completed successfully!');
+        }, 1500);
+    }
+
+    handleUserProfile() {
+        console.log('User profile clicked');
+        this.showNotification('Opening user profile...');
+    }
+
+    showNotification(message) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = message;
+        
+        // Style the notification
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
         `;
         
-        chatMessages.appendChild(messageDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        // Add to page
+        document.body.appendChild(notification);
+        
+        // Show notification
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.style.transform = 'translateX(400px)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
     }
 }
 
 // Initialize the application when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new DIDChat();
+    new UnethiatApp();
 });
